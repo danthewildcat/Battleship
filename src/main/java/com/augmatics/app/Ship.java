@@ -5,29 +5,31 @@ public class Ship {
     private boolean orientation; // true is horizontal
     private boolean sunk = false;
     private int shipLength;
-    private List<Integer> positions;
-    private List<Integer> hits;
+    private ArrayList<Integer> positions;
+    private ArrayList<Integer> hits;
     
-    public Ship(int start, int len, int gridSize, boolean orientation){
-        this.shipLength = len;
-        this.orientation = orientation;
+    public Ship(int start, int len, boolean orientation, int gridSize){
+        shipLength = len;
+        orientation = orientation;
         
         positions = new ArrayList<Integer>(len);
         if (orientation) {
             // Horizontal
             for (int i=0;i<len;i++){
-                this.positions.add(start + i);
+                positions.add(start + i);
             }
         } else {
             // Vertical
             for (int i=0;i<len;i++){
-                this.positions.add(start + gridSize);
+                positions.add(start + gridSize*i);
             }      
         }
         
         // Clone the positions into the hits list
-        hits = new ArrayList<Integer>(positions.size());
-        Collections.copy(hits, positions);
+        hits = new ArrayList<Integer>(shipLength);
+        
+        System.out.println(orientation ? "horizontal":"vertical");
+        System.out.println(positions);
     }
     
     public boolean onTarget(Integer location){
@@ -35,13 +37,26 @@ public class Ship {
     }
     
     public boolean applyHit(Integer location){
-        return hits.remove(location);
+        if (hits.contains(location)){
+            return false;
+        } else {
+            hits.add(location);
+            return true;
+        }
+    }
+    
+    public ArrayList<Integer> getCells(){
+        return positions;
+    }
+    
+    public ArrayList<Integer> getHits(){
+        return hits;
     }
     
     public boolean isSunk(){
         if (sunk) return true;
         
-        if (hits.isEmpty()){
+        if (hits.size() == shipLength){
             sunk = true;
         }
         

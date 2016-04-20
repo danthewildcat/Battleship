@@ -50,7 +50,6 @@ public class Battleship {
         }
         toDelete.add((Integer)25);
         validHorizontal.removeAll(toDelete);
-        System.out.println(validHorizontal);
         
         List<Integer> validVertical = new ArrayList<Integer>(gridLocations);
         toDelete.clear();
@@ -61,16 +60,51 @@ public class Battleship {
             toDelete.add(i);
         }
         validVertical.removeAll(toDelete);
-        System.out.println(validVertical);
-        
-        
         for (int i=0;i<shipCount; i++){
+            Integer start = 0;
             // true orientation will mean horizontal
-            boolean orientation = randInt(0,1) == 0;
+            Random rn = new Random();
+            boolean orientation = rn.nextInt(2) == 0;
+            int orientationCheck = 0;
+            List<Integer> choices = new ArrayList<Integer>();
+            int counter = 0;
+            while (start == 0 && counter < totalCells*2){
+                // Just going to keep trying random positions until we
+                // find one that works...
+                if (choices.size() == 0){
+                    orientationCheck += 1;
+                    if (orientation){
+                        choices = new ArrayList<Integer>(validHorizontal);
+                    } else {
+                        choices = new ArrayList<Integer>(validVertical);
+                    }
+                }
+                
+                int choice = rn.nextInt(choices.size());
+                Integer attempt = choices.remove(choice);
+                boolean validAttempt = true;
+                for (Ship ship:ships){
+                    if (ship.onTarget(attempt)){
+                        validAttempt = false;
+                        break;
+                    }
+                }
+                
+                if (validAttempt){
+                    start = attempt;
+                }
+            }
             
-            // Just going to keep trying random positions until we
-            // find one that works...
-            int guesses = 0;
+            if (start == 0){
+                // Throw grid size exception
+            } else {
+                if (orientation){
+                    validHorizontal.remove(start);
+                } else {
+                    validVertical.remove(start);
+                }
+                ships.add(new Ship(start, shipLength, orientation, gridSize));
+            }
         }
     }
         
@@ -82,9 +116,44 @@ public class Battleship {
         return false;
     }
     
+    private void renderGrid(){
+        List<Integer> shipCells = new ArrayList<Integer>(gridSize*gridSize);
+        List<Integer> hitCells = new ArrayList<Integer>(gridSize*gridSize);
+        
+        for (Ship ship:ships){
+            shipCells.addAll(ship.getCells());
+            hitCells.addAll(ship.getHits());
+        }
+        
+        List<String> lines = new ArrayList<String>(gridSize);
+        for (int i=0; i<gridSize; i++){
+            lines.add("");
+        }
+        
+        for (Integer i=1;i<=gridSize*gridSize; i++){
+            String cell = " 0 ";
+            Integer position = i;
+            if (hitCells.remove(position)){
+                cell = " H ";
+            } else if (shipCells.remove(position)){
+                cell = " S ";
+            }
+            int line = i/gridSize;
+            if (i % gridSize == 0){
+                line -= 1;
+            }
+            String oldLine = lines.get(line);
+            lines.set(line, oldLine + cell);
+        }
+        
+        for (String ln: lines){
+            System.out.println(ln);
+        }
+    }
+    
     public void play(){
         GameHelper helper = new GameHelper();
-        
+        renderGrid();
         /*
         String ready = helper.getUserInput("Ready to play?(yes or no)");
         int count = 0;
