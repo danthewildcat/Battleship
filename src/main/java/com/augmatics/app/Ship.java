@@ -5,8 +5,8 @@ public class Ship {
     private boolean orientation; // true is horizontal
     private boolean sunk = false;
     private int shipLength;
-    private ArrayList<Integer> positions;
-    private ArrayList<Integer> hits;
+    private List<Integer> positions;
+    private List<Integer> hits;
     
     public Ship(int start, int len, boolean orientation, int gridSize){
         shipLength = len;
@@ -27,9 +27,6 @@ public class Ship {
         
         // Clone the positions into the hits list
         hits = new ArrayList<Integer>(shipLength);
-        
-        System.out.println(orientation ? "horizontal":"vertical");
-        System.out.println(positions);
     }
     
     public boolean onTarget(Integer location){
@@ -45,11 +42,11 @@ public class Ship {
         }
     }
     
-    public ArrayList<Integer> getCells(){
+    public List<Integer> getCells(){
         return positions;
     }
     
-    public ArrayList<Integer> getHits(){
+    public List<Integer> getHits(){
         return hits;
     }
     

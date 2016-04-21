@@ -116,6 +116,41 @@ public class Battleship {
         return false;
     }
     
+    private static char[] allLetters()
+    {
+        char[] alphabet = {'A','B','C','D','E','F','G','H','I','J','K','L',
+                            'M','N','O','P','Q','R','S','T','U','V','W','X',
+                            'Y','Z'};
+        return alphabet;
+    }
+    
+    private List<String> gridLetters(int count){
+        List<String> letters = new ArrayList<String>(count);
+        char[] alphabet = allLetters();
+        int letterCount = alphabet.length;
+        for (int i=0; i<count; i++){
+            List<Integer> remainders = new ArrayList<Integer>(10);
+            int quotient = i / letterCount;
+            remainders.add(i % letterCount);
+            int remCount = 1;
+            while (quotient > 0 && remCount <= 10){
+                remainders.add(quotient % letterCount);
+                quotient = quotient / letterCount;
+                remCount += 1;
+            }
+            String result = "";
+            for (int j=0; j<remainders.size(); j++){
+                result += alphabet[remainders.get(j)];
+            }
+            letters.add(result);
+        }
+        
+        // TODO: if some of the letter coordinates are multiple characters
+        // we need to zero pad the smaller values
+        
+        return letters;
+    }
+    
     private void renderGrid(){
         List<Integer> shipCells = new ArrayList<Integer>(gridSize*gridSize);
         List<Integer> hitCells = new ArrayList<Integer>(gridSize*gridSize);
@@ -146,6 +181,24 @@ public class Battleship {
             lines.set(line, oldLine + cell);
         }
         
+        List<String> letters = gridLetters(gridSize);
+        // Add the right side
+        for (int i=0; i<gridSize; i++){
+            // Letters are in ascending order...
+            String coord = letters.get(gridSize - i - 1);
+            // Lines are in descending order...
+            String existingLn = lines.get(i);
+            String newLine = coord + "| " + existingLn;
+            lines.set(i, newLine);
+        }
+        
+        // Add the bottom...
+        String bottom = "   ";
+        for (int i=1; i<= gridSize; i++){
+            bottom += " " + i + " ";
+        }
+        lines.add(bottom);
+        
         for (String ln: lines){
             System.out.println(ln);
         }
@@ -154,19 +207,17 @@ public class Battleship {
     public void play(){
         GameHelper helper = new GameHelper();
         renderGrid();
-        /*
-        String ready = helper.getUserInput("Ready to play?(yes or no)");
+        
+        int requiredHits = 0;
+        int totalHits = 0;
+        for (Ship ship: ships){
+            requiredHits += ship.getLength();
+        }
+        
         int count = 0;
-        while (ready.equals("yes") == false && count < 5){
-            ready = helper.getUserInput("How about now?(yes or no)");
+        while (totalHits < requiredHits && count < 2){
+            String attempt = helper.getUserInput("Target?");
             count += 1;
         }
-        
-        if (ready.equals("yes") == false){
-            System.out.println("Exiting Game");
-            return;
-        }
-        
-        System.out.println("Woohoo!");*/
     }
 }
